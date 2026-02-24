@@ -16,6 +16,7 @@ import AnalyticsPage from "./pages/AnalyticsPage";
 import LogsPage from "./pages/LogsPage";
 import SettingsPage from "./pages/SettingsPage";
 import HRAgentPage from "./pages/HRAgentPage";
+import SalesAgentPage from "./pages/SalesAgentPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,6 +43,7 @@ const App = () => (
             <Route path="/logs" element={<ProtectedRoute><LogsPage /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
             <Route path="/hr-agent" element={<ProtectedRoute><HRAgentPage /></ProtectedRoute>} />
+            <Route path="/sales-agent" element={<ProtectedRoute><SalesAgentPage /></ProtectedRoute>} />
 
             {/* Root redirect */}
             <Route path="/" element={<Navigate to="/login" replace />} />

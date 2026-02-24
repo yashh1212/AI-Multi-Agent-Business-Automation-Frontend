@@ -14,6 +14,7 @@ import {
   ChevronRight,
   Zap,
   UserRoundSearch,
+  TrendingUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -21,11 +22,12 @@ const navItems = [
   { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { path: "/agents", label: "Agents", icon: Bot },
   { path: "/hr-agent", label: "HR Agent", icon: UserRoundSearch },
+  { path: "/sales-agent", label: "Sales Agent", icon: TrendingUp },
   { path: "/workflows", label: "Workflows", icon: GitBranch },
   { path: "/integrations", label: "Integrations", icon: Plug },
   { path: "/mail", label: "Mail Automation", icon: Mail },
-  { path: "/analytics", label: "Analytics", icon: BarChart3 },
-  { path: "/logs", label: "Activity Logs", icon: ScrollText },
+  // { path: "/analytics", label: "Analytics", icon: BarChart3 },
+  // { path: "/logs", label: "Activity Logs", icon: ScrollText },
   { path: "/settings", label: "Settings", icon: Settings },
 ];
 
