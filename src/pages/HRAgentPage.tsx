@@ -1,623 +1,4 @@
-// import { useState } from "react";
-// import { motion, AnimatePresence } from "framer-motion";
-// import {
-//   UserPlus,
-//   Brain,
-//   CalendarCheck,
-//   CheckCircle2,
-//   XCircle,
-//   FileText,
-//   Mail,
-//   Video,
-//   Clock,
-//   Star,
-//   Upload,
-//   Loader2,
-//   ArrowRight,
-//   ChevronDown,
-//   ChevronUp,
-//   Briefcase,
-//   GraduationCap,
-//   MapPin,
-//   Phone,
-//   User,
-//   Sparkles,
-//   Send,
-//   CalendarDays,
-//   Trophy,
-//   AlertCircle,
-// } from "lucide-react";
-// import { DashboardLayout } from "@/components/layout/DashboardLayout";
-// import { KpiCard } from "@/components/dashboard/KpiCard";
-// import { cn } from "@/lib/utils";
-
-// // ─── Types ────────────────────────────────────────────────────────────────────
-// type CandidateStatus = "applied" | "screening" | "shortlisted" | "interview_scheduled" | "hired" | "rejected";
-
-// interface Candidate {
-//   id: number;
-//   name: string;
-//   email: string;
-//   phone: string;
-//   position: string;
-//   location: string;
-//   experience: string;
-//   education: string;
-//   resumeScore: number | null;
-//   status: CandidateStatus;
-//   appliedAt: string;
-//   interviewDate?: string;
-//   meetLink?: string;
-//   notes?: string;
-// }
-
-// // ─── Mock Data ────────────────────────────────────────────────────────────────
-// const initialCandidates: Candidate[] = [
-//   { id: 1, name: "Priya Sharma", email: "priya.sharma@gmail.com", phone: "+91 98765 43210", position: "Senior Frontend Developer", location: "Bangalore, India", experience: "6 years", education: "B.Tech Computer Science, IIT Delhi", resumeScore: 87, status: "shortlisted", appliedAt: "2 hours ago", notes: "Strong React & TypeScript skills. Led 3 major product launches." },
-//   { id: 2, name: "Rahul Mehta", email: "rahul.mehta@outlook.com", phone: "+91 87654 32109", position: "Backend Engineer", location: "Mumbai, India", experience: "4 years", education: "M.Tech Software Engineering, BITS Pilani", resumeScore: 72, status: "interview_scheduled", appliedAt: "5 hours ago", interviewDate: "2026-02-24 10:00 AM", meetLink: "https://meet.google.com/abc-defg-hij", notes: "Good Node.js experience. Has worked with microservices." },
-//   { id: 3, name: "Ananya Gupta", email: "ananya.g@yahoo.com", phone: "+91 76543 21098", position: "UI/UX Designer", location: "Pune, India", experience: "3 years", education: "BDes, NID Ahmedabad", resumeScore: 91, status: "hired", appliedAt: "1 day ago", notes: "Exceptional portfolio. Figma expert with design system experience." },
-//   { id: 4, name: "Vikram Singh", email: "vikram.s@gmail.com", phone: "+91 65432 10987", position: "DevOps Engineer", location: "Hyderabad, India", experience: "2 years", education: "B.Tech IT, VIT Vellore", resumeScore: 38, status: "rejected", appliedAt: "1 day ago", notes: "Limited hands-on experience. No CI/CD pipeline work." },
-//   { id: 5, name: "Sneha Patel", email: "sneha.patel@gmail.com", phone: "+91 54321 09876", position: "Data Scientist", location: "Chennai, India", experience: "5 years", education: "MS Data Science, ISI Kolkata", resumeScore: null, status: "applied", appliedAt: "30 min ago" },
-//   { id: 6, name: "Arjun Reddy", email: "arjun.r@protonmail.com", phone: "+91 43210 98765", position: "Full Stack Developer", location: "Delhi, India", experience: "7 years", education: "B.Tech CSE, NIT Trichy", resumeScore: null, status: "screening", appliedAt: "15 min ago" },
-// ];
-
-// const hrStats = {
-//   totalApplications: 156,
-//   shortlisted: 42,
-//   interviewsScheduled: 18,
-//   hiredThisMonth: 7,
-//   rejectedThisMonth: 89,
-//   avgResumeScore: 64,
-// };
-
-// const statusConfig: Record<CandidateStatus, { label: string; color: string; bgColor: string; icon: typeof UserPlus }> = {
-//   applied: { label: "Applied", color: "text-blue-400", bgColor: "bg-blue-400/10", icon: UserPlus },
-//   screening: { label: "AI Screening", color: "text-amber-400", bgColor: "bg-amber-400/10", icon: Brain },
-//   shortlisted: { label: "Shortlisted", color: "text-emerald-400", bgColor: "bg-emerald-400/10", icon: Star },
-//   interview_scheduled: { label: "Interview Scheduled", color: "text-purple-400", bgColor: "bg-purple-400/10", icon: CalendarCheck },
-//   hired: { label: "Hired", color: "text-green-400", bgColor: "bg-green-400/10", icon: CheckCircle2 },
-//   rejected: { label: "Rejected", color: "text-red-400", bgColor: "bg-red-400/10", icon: XCircle },
-// };
-
-// // ─── Sub-components ───────────────────────────────────────────────────────────
-
-// function ScoreBadge({ score }: { score: number | null }) {
-//   if (score === null) return <span className="text-xs text-muted-foreground italic">Pending</span>;
-//   const color = score >= 70 ? "text-green-400 bg-green-400/10" : score >= 50 ? "text-amber-400 bg-amber-400/10" : "text-red-400 bg-red-400/10";
-//   return (
-//     <span className={cn("text-xs font-bold px-2.5 py-1 rounded-lg", color)}>
-//       {score}/100
-//     </span>
-//   );
-// }
-
-// function FlowDiagram() {
-//   const steps = [
-//     { icon: UserPlus, label: "Apply", desc: "POST /hr/apply" },
-//     { icon: Brain, label: "AI Screen", desc: "Groq AI (0-100)" },
-//     { icon: CalendarCheck, label: "Interview", desc: "Google Calendar" },
-//     { icon: CheckCircle2, label: "Hire / Reject", desc: "Offer + Onboard" },
-//   ];
-
-//   return (
-//     <div className="flex items-center justify-between gap-2 py-3 overflow-x-auto">
-//       {steps.map((step, i) => (
-//         <div key={step.label} className="flex items-center gap-2 min-w-0">
-//           <motion.div
-//             initial={{ scale: 0 }}
-//             animate={{ scale: 1 }}
-//             transition={{ delay: i * 0.15, type: "spring", stiffness: 200 }}
-//             className="flex flex-col items-center gap-1.5"
-//           >
-//             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-//               <step.icon className="h-5 w-5 text-primary" />
-//             </div>
-//             <span className="text-xs font-semibold text-foreground whitespace-nowrap">{step.label}</span>
-//             <span className="text-[10px] text-muted-foreground whitespace-nowrap">{step.desc}</span>
-//           </motion.div>
-//           {i < steps.length - 1 && (
-//             <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0 mx-1" />
-//           )}
-//         </div>
-//       ))}
-//     </div>
-//   );
-// }
-
-// // ─── Application Form Modal ──────────────────────────────────────────────────
-// function ApplicationForm({ onSubmit, onClose }: { onSubmit: (c: Omit<Candidate, "id" | "resumeScore" | "status" | "appliedAt">) => void; onClose: () => void }) {
-//   const [form, setForm] = useState({ name: "", email: "", phone: "", position: "", location: "", experience: "", education: "" });
-//   const update = (key: string, val: string) => setForm((p) => ({ ...p, [key]: val }));
-
-//   return (
-//     <motion.div
-//       initial={{ opacity: 0 }}
-//       animate={{ opacity: 1 }}
-//       exit={{ opacity: 0 }}
-//       className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4"
-//       onClick={onClose}
-//     >
-//       <motion.div
-//         initial={{ scale: 0.95, opacity: 0 }}
-//         animate={{ scale: 1, opacity: 1 }}
-//         exit={{ scale: 0.95, opacity: 0 }}
-//         className="glass-card rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto"
-//         onClick={(e) => e.stopPropagation()}
-//       >
-//         <h2 className="text-lg font-bold text-foreground flex items-center gap-2 mb-5">
-//           <UserPlus className="h-5 w-5 text-primary" /> New Application
-//         </h2>
-//         <div className="space-y-4">
-//           {[
-//             { key: "name", label: "Full Name", icon: User, placeholder: "John Doe" },
-//             { key: "email", label: "Email", icon: Mail, placeholder: "john@example.com", type: "email" },
-//             { key: "phone", label: "Phone", icon: Phone, placeholder: "+91 99999 99999" },
-//             { key: "position", label: "Position Applied", icon: Briefcase, placeholder: "Senior Frontend Developer" },
-//             { key: "location", label: "Location", icon: MapPin, placeholder: "Bangalore, India" },
-//             { key: "experience", label: "Experience", icon: Clock, placeholder: "5 years" },
-//             { key: "education", label: "Education", icon: GraduationCap, placeholder: "B.Tech CS, IIT Delhi" },
-//           ].map((field) => (
-//             <div key={field.key} className="space-y-1.5">
-//               <label className="text-xs font-medium text-foreground">{field.label}</label>
-//               <div className="relative">
-//                 <field.icon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-//                 <input
-//                   type={field.type || "text"}
-//                   value={form[field.key as keyof typeof form]}
-//                   onChange={(e) => update(field.key, e.target.value)}
-//                   placeholder={field.placeholder}
-//                   className="w-full rounded-xl border border-border bg-muted/50 py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
-//                 />
-//               </div>
-//             </div>
-//           ))}
-
-//           {/* Resume upload area */}
-//           <div className="space-y-1.5">
-//             <label className="text-xs font-medium text-foreground">Resume</label>
-//             <div className="border-2 border-dashed border-border rounded-xl p-6 flex flex-col items-center gap-2 text-muted-foreground hover:border-primary/40 transition-colors cursor-pointer">
-//               <Upload className="h-6 w-6" />
-//               <span className="text-xs">Drop resume or click to upload</span>
-//               <span className="text-[10px] text-muted-foreground/60">PDF, DOCX (max 5MB)</span>
-//             </div>
-//           </div>
-//         </div>
-
-//         <div className="flex gap-3 mt-6">
-//           <button onClick={onClose} className="flex-1 rounded-xl border border-border py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted transition-colors">
-//             Cancel
-//           </button>
-//           <button
-//             onClick={() => {
-//               if (form.name && form.email && form.position) {
-//                 onSubmit(form);
-//               }
-//             }}
-//             className="flex-1 rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 hover:shadow-xl transition-all flex items-center justify-center gap-2"
-//           >
-//             <Send className="h-4 w-4" /> Submit Application
-//           </button>
-//         </div>
-//       </motion.div>
-//     </motion.div>
-//   );
-// }
-
-// // ─── Candidate Card ──────────────────────────────────────────────────────────
-// function CandidateCard({
-//   candidate,
-//   onAction,
-// }: {
-//   candidate: Candidate;
-//   onAction: (id: number, action: "screen" | "schedule" | "hire" | "reject") => void;
-// }) {
-//   const [expanded, setExpanded] = useState(false);
-//   const config = statusConfig[candidate.status];
-
-//   return (
-//     <motion.div
-//       initial={{ opacity: 0, y: 20 }}
-//       animate={{ opacity: 1, y: 0 }}
-//       className="glass-card-hover rounded-2xl overflow-hidden"
-//     >
-//       {/* Header */}
-//       <div className="p-5">
-//         <div className="flex items-start justify-between mb-3">
-//           <div className="flex items-center gap-3 min-w-0">
-//             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 shrink-0">
-//               <User className="h-5 w-5 text-primary" />
-//             </div>
-//             <div className="min-w-0">
-//               <h3 className="text-sm font-semibold text-foreground truncate">{candidate.name}</h3>
-//               <p className="text-xs text-muted-foreground truncate">{candidate.position}</p>
-//             </div>
-//           </div>
-//           <div className="flex items-center gap-2 shrink-0">
-//             <span className={cn("text-[10px] px-2 py-1 rounded-full font-semibold flex items-center gap-1", config.bgColor, config.color)}>
-//               <config.icon className="h-3 w-3" />
-//               {config.label}
-//             </span>
-//           </div>
-//         </div>
-
-//         {/* Quick info */}
-//         <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mb-3">
-//           <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{candidate.location}</span>
-//           <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{candidate.experience}</span>
-//           <span className="flex items-center gap-1"><GraduationCap className="h-3 w-3" />{candidate.education}</span>
-//         </div>
-
-//         {/* Score + Time */}
-//         <div className="flex items-center justify-between">
-//           <div className="flex items-center gap-2">
-//             <span className="text-xs text-muted-foreground">AI Score:</span>
-//             <ScoreBadge score={candidate.resumeScore} />
-//           </div>
-//           <span className="text-[10px] text-muted-foreground">{candidate.appliedAt}</span>
-//         </div>
-
-//         {/* Interview info */}
-//         {candidate.interviewDate && (
-//           <motion.div
-//             initial={{ opacity: 0 }}
-//             animate={{ opacity: 1 }}
-//             className="mt-3 rounded-xl bg-purple-400/5 border border-purple-400/10 p-3 flex items-center gap-3"
-//           >
-//             <CalendarDays className="h-4 w-4 text-purple-400 shrink-0" />
-//             <div className="min-w-0">
-//               <p className="text-xs font-medium text-foreground">{candidate.interviewDate}</p>
-//               {candidate.meetLink && (
-//                 <a href={candidate.meetLink} target="_blank" rel="noreferrer" className="text-[10px] text-primary hover:underline flex items-center gap-1">
-//                   <Video className="h-3 w-3" /> Join Google Meet
-//                 </a>
-//               )}
-//             </div>
-//           </motion.div>
-//         )}
-
-//         {/* Expand toggle */}
-//         <button
-//           onClick={() => setExpanded(!expanded)}
-//           className="mt-3 flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors w-full justify-center"
-//         >
-//           {expanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-//           {expanded ? "Less" : "Actions & Details"}
-//         </button>
-//       </div>
-
-//       {/* Expanded section */}
-//       <AnimatePresence>
-//         {expanded && (
-//           <motion.div
-//             initial={{ height: 0, opacity: 0 }}
-//             animate={{ height: "auto", opacity: 1 }}
-//             exit={{ height: 0, opacity: 0 }}
-//             className="overflow-hidden"
-//           >
-//             <div className="px-5 pb-5 pt-0 space-y-3 border-t border-border/50">
-//               {candidate.notes && (
-//                 <div className="pt-3">
-//                   <p className="text-xs text-muted-foreground">
-//                     <span className="font-semibold text-foreground">AI Notes: </span>
-//                     {candidate.notes}
-//                   </p>
-//                 </div>
-//               )}
-
-//               {/* Contact */}
-//               <div className="flex gap-4 text-xs text-muted-foreground pt-1">
-//                 <span className="flex items-center gap-1"><Mail className="h-3 w-3" />{candidate.email}</span>
-//                 <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{candidate.phone}</span>
-//               </div>
-
-//               {/* Action Buttons */}
-//               <div className="flex flex-wrap gap-2 pt-2">
-//                 {candidate.status === "applied" && (
-//                   <button
-//                     onClick={() => onAction(candidate.id, "screen")}
-//                     className="flex items-center gap-1.5 rounded-lg bg-amber-400/10 px-3 py-2 text-xs font-semibold text-amber-400 hover:bg-amber-400/20 transition-colors"
-//                   >
-//                     <Brain className="h-3.5 w-3.5" /> Screen with AI
-//                   </button>
-//                 )}
-//                 {candidate.status === "screening" && (
-//                   <div className="flex items-center gap-2 rounded-lg bg-amber-400/10 px-3 py-2 text-xs font-semibold text-amber-400">
-//                     <Loader2 className="h-3.5 w-3.5 animate-spin" /> AI Screening in Progress...
-//                   </div>
-//                 )}
-//                 {candidate.status === "shortlisted" && (
-//                   <>
-//                     <button
-//                       onClick={() => onAction(candidate.id, "schedule")}
-//                       className="flex items-center gap-1.5 rounded-lg bg-purple-400/10 px-3 py-2 text-xs font-semibold text-purple-400 hover:bg-purple-400/20 transition-colors"
-//                     >
-//                       <CalendarCheck className="h-3.5 w-3.5" /> Schedule Interview
-//                     </button>
-//                     <button
-//                       onClick={() => onAction(candidate.id, "reject")}
-//                       className="flex items-center gap-1.5 rounded-lg bg-red-400/10 px-3 py-2 text-xs font-semibold text-red-400 hover:bg-red-400/20 transition-colors"
-//                     >
-//                       <XCircle className="h-3.5 w-3.5" /> Reject
-//                     </button>
-//                   </>
-//                 )}
-//                 {candidate.status === "interview_scheduled" && (
-//                   <>
-//                     <button
-//                       onClick={() => onAction(candidate.id, "hire")}
-//                       className="flex items-center gap-1.5 rounded-lg bg-green-400/10 px-3 py-2 text-xs font-semibold text-green-400 hover:bg-green-400/20 transition-colors"
-//                     >
-//                       <CheckCircle2 className="h-3.5 w-3.5" /> Hire
-//                     </button>
-//                     <button
-//                       onClick={() => onAction(candidate.id, "reject")}
-//                       className="flex items-center gap-1.5 rounded-lg bg-red-400/10 px-3 py-2 text-xs font-semibold text-red-400 hover:bg-red-400/20 transition-colors"
-//                     >
-//                       <XCircle className="h-3.5 w-3.5" /> Reject
-//                     </button>
-//                   </>
-//                 )}
-//                 {candidate.status === "hired" && (
-//                   <div className="flex items-center gap-2 rounded-lg bg-green-400/10 px-3 py-2 text-xs font-semibold text-green-400">
-//                     <Trophy className="h-3.5 w-3.5" /> Offer Sent · Onboarding Started
-//                   </div>
-//                 )}
-//                 {candidate.status === "rejected" && (
-//                   <div className="flex items-center gap-2 rounded-lg bg-red-400/10 px-3 py-2 text-xs font-semibold text-red-400">
-//                     <AlertCircle className="h-3.5 w-3.5" /> Rejection Email Sent
-//                   </div>
-//                 )}
-//               </div>
-//             </div>
-//           </motion.div>
-//         )}
-//       </AnimatePresence>
-//     </motion.div>
-//   );
-// }
-
-// // ─── Activity Log ─────────────────────────────────────────────────────────────
-// interface HrLogEntry {
-//   id: number;
-//   action: string;
-//   detail: string;
-//   time: string;
-//   type: "apply" | "screen" | "schedule" | "hire" | "reject" | "email";
-// }
-
-// const initialLogs: HrLogEntry[] = [
-//   { id: 1, action: "Application Received", detail: "Sneha Patel applied for Data Scientist", time: "30 min ago", type: "apply" },
-//   { id: 2, action: "AI Screening Started", detail: "Arjun Reddy — Full Stack Developer", time: "15 min ago", type: "screen" },
-//   { id: 3, action: "Interview Scheduled", detail: "Rahul Mehta — Feb 24, 10:00 AM (Google Meet)", time: "1 hour ago", type: "schedule" },
-//   { id: 4, action: "Candidate Hired", detail: "Ananya Gupta — UI/UX Designer — Offer letter + onboarding plan sent", time: "1 day ago", type: "hire" },
-//   { id: 5, action: "Candidate Rejected", detail: "Vikram Singh — DevOps Engineer — Score: 38/100", time: "1 day ago", type: "reject" },
-//   { id: 6, action: "Shortlist Email Sent", detail: "Priya Sharma — Score: 87/100 — Interview invite pending", time: "2 hours ago", type: "email" },
-// ];
-
-// const logTypeColors: Record<HrLogEntry["type"], string> = {
-//   apply: "text-blue-400 bg-blue-400/10",
-//   screen: "text-amber-400 bg-amber-400/10",
-//   schedule: "text-purple-400 bg-purple-400/10",
-//   hire: "text-green-400 bg-green-400/10",
-//   reject: "text-red-400 bg-red-400/10",
-//   email: "text-primary bg-primary/10",
-// };
-
-// const logTypeIcons: Record<HrLogEntry["type"], typeof UserPlus> = {
-//   apply: UserPlus,
-//   screen: Brain,
-//   schedule: CalendarCheck,
-//   hire: CheckCircle2,
-//   reject: XCircle,
-//   email: Mail,
-// };
-
-// // ─── Main Page ────────────────────────────────────────────────────────────────
-// const HRAgentPage = () => {
-//   const [candidates, setCandidates] = useState<Candidate[]>(initialCandidates);
-//   const [logs, setLogs] = useState<HrLogEntry[]>(initialLogs);
-//   const [showForm, setShowForm] = useState(false);
-//   const [filter, setFilter] = useState<CandidateStatus | "all">("all");
-//   const [actionLoading, setActionLoading] = useState<number | null>(null);
-
-//   const addLog = (action: string, detail: string, type: HrLogEntry["type"]) => {
-//     setLogs((prev) => [{ id: Date.now(), action, detail, time: "Just now", type }, ...prev]);
-//   };
-
-//   const handleSubmitApplication = (form: Omit<Candidate, "id" | "resumeScore" | "status" | "appliedAt">) => {
-//     const newCandidate: Candidate = {
-//       ...form,
-//       id: Date.now(),
-//       resumeScore: null,
-//       status: "applied",
-//       appliedAt: "Just now",
-//     };
-//     setCandidates((prev) => [newCandidate, ...prev]);
-//     addLog("Application Received", `${form.name} applied for ${form.position}`, "apply");
-//     setShowForm(false);
-//   };
-
-//   const handleAction = async (id: number, action: "screen" | "schedule" | "hire" | "reject") => {
-//     setActionLoading(id);
-
-//     // Simulate API call delay
-//     await new Promise((r) => setTimeout(r, 1500));
-
-//     setCandidates((prev) =>
-//       prev.map((c) => {
-//         if (c.id !== id) return c;
-//         switch (action) {
-//           case "screen": {
-//             const score = Math.floor(Math.random() * 60) + 30; // 30-89
-//             const newStatus: CandidateStatus = score >= 50 ? "shortlisted" : "rejected";
-//             addLog(
-//               score >= 50 ? "Candidate Shortlisted" : "Candidate Rejected (Low Score)",
-//               `${c.name} — ${c.position} — AI Score: ${score}/100`,
-//               score >= 50 ? "screen" : "reject"
-//             );
-//             if (score >= 50) {
-//               addLog("Shortlist Email Sent", `${c.name} — Interview invite pending`, "email");
-//             } else {
-//               addLog("Rejection Email Sent", `${c.name} — Score below threshold`, "email");
-//             }
-//             return { ...c, resumeScore: score, status: newStatus, notes: score >= 50 ? `AI screened: Score ${score}/100. Skills match the role requirements.` : `AI screened: Score ${score}/100. Did not meet minimum requirements.` };
-//           }
-//           case "schedule": {
-//             const date = "2026-02-26 02:30 PM";
-//             const link = `https://meet.google.com/${Math.random().toString(36).slice(2, 5)}-${Math.random().toString(36).slice(2, 6)}-${Math.random().toString(36).slice(2, 5)}`;
-//             addLog("Interview Scheduled", `${c.name} — ${date} (Google Meet)`, "schedule");
-//             addLog("Interview Email Sent", `${c.name} — Google Meet link + calendar invite`, "email");
-//             return { ...c, status: "interview_scheduled", interviewDate: date, meetLink: link };
-//           }
-//           case "hire":
-//             addLog("Candidate Hired", `${c.name} — ${c.position}`, "hire");
-//             addLog("Offer Letter Generated", `AI-generated offer letter sent to ${c.email}`, "email");
-//             addLog("Onboarding Plan Created", `5-day onboarding plan sent to ${c.email}`, "email");
-//             return { ...c, status: "hired", notes: (c.notes || "") + " Offer letter generated & sent. 5-day onboarding plan created." };
-//           case "reject":
-//             addLog("Candidate Rejected", `${c.name} — ${c.position}`, "reject");
-//             addLog("Rejection Email Sent", `Post-interview rejection sent to ${c.email}`, "email");
-//             return { ...c, status: "rejected" };
-//           default:
-//             return c;
-//         }
-//       })
-//     );
-
-//     setActionLoading(null);
-//   };
-
-//   const filtered = filter === "all" ? candidates : candidates.filter((c) => c.status === filter);
-
-//   const statusCounts = candidates.reduce(
-//     (acc, c) => {
-//       acc[c.status] = (acc[c.status] || 0) + 1;
-//       return acc;
-//     },
-//     {} as Record<string, number>
-//   );
-
-//   return (
-//     <DashboardLayout>
-//       <div className="space-y-6">
-//         {/* Header */}
-//         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-//           <div>
-//             <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-//               <Sparkles className="h-6 w-6 text-primary" /> HR Agent
-//             </h1>
-//             <p className="text-sm text-muted-foreground">AI-powered hiring: screen resumes, schedule interviews, and onboard candidates</p>
-//           </div>
-//           <button
-//             onClick={() => setShowForm(true)}
-//             className="flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 hover:shadow-xl transition-all shrink-0"
-//           >
-//             <UserPlus className="h-4 w-4" /> New Application
-//           </button>
-//         </div>
-
-//         {/* Flow Diagram */}
-//         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-card rounded-2xl p-5">
-//           <h3 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-2">
-//             <FileText className="h-4 w-4 text-primary" /> HR Agent Workflow
-//           </h3>
-//           <FlowDiagram />
-//         </motion.div>
-
-//         {/* KPI Cards */}
-//         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-//           <KpiCard title="Total Applications" value={hrStats.totalApplications} change="+12 this week" icon={UserPlus} delay={0} />
-//           <KpiCard title="Shortlisted" value={hrStats.shortlisted} change={`${Math.round((hrStats.shortlisted / hrStats.totalApplications) * 100)}% rate`} icon={Star} delay={0.1} />
-//           <KpiCard title="Interviews Scheduled" value={hrStats.interviewsScheduled} change="3 this week" changeType="neutral" icon={CalendarCheck} delay={0.2} />
-//           <KpiCard title="Hired This Month" value={hrStats.hiredThisMonth} change="+2 vs last month" icon={Trophy} delay={0.3} />
-//         </div>
-
-//         {/* Filter Tabs */}
-//         <div className="flex flex-wrap gap-2">
-//           {[
-//             { key: "all" as const, label: "All", count: candidates.length },
-//             ...Object.entries(statusConfig).map(([key, val]) => ({ key: key as CandidateStatus, label: val.label, count: statusCounts[key] || 0 })),
-//           ].map((tab) => (
-//             <button
-//               key={tab.key}
-//               onClick={() => setFilter(tab.key)}
-//               className={cn(
-//                 "flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-medium transition-all border",
-//                 filter === tab.key
-//                   ? "border-primary/30 bg-primary/10 text-primary"
-//                   : "border-border text-muted-foreground hover:bg-muted"
-//               )}
-//             >
-//               {tab.label}
-//               <span className={cn("rounded-full px-1.5 py-0.5 text-[10px] font-bold", filter === tab.key ? "bg-primary/20" : "bg-muted")}>
-//                 {tab.count}
-//               </span>
-//             </button>
-//           ))}
-//         </div>
-
-//         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-//           {/* Candidate Cards */}
-//           <div className="lg:col-span-2 space-y-4">
-//             {filtered.length === 0 ? (
-//               <div className="glass-card rounded-2xl p-10 text-center">
-//                 <UserPlus className="h-10 w-10 mx-auto text-muted-foreground/40 mb-3" />
-//                 <p className="text-sm text-muted-foreground">No candidates with this status</p>
-//               </div>
-//             ) : (
-//               filtered.map((c) => (
-//                 <CandidateCard
-//                   key={c.id}
-//                   candidate={actionLoading === c.id ? { ...c, status: c.status === "applied" ? "screening" : c.status } : c}
-//                   onAction={handleAction}
-//                 />
-//               ))
-//             )}
-//           </div>
-
-//           {/* Activity Log Sidebar */}
-//           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glass-card rounded-2xl p-5 h-fit lg:sticky lg:top-24">
-//             <h3 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-4">
-//               <Clock className="h-4 w-4 text-primary" /> Recent Activity
-//             </h3>
-//             <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
-//               {logs.slice(0, 10).map((log) => {
-//                 const Icon = logTypeIcons[log.type];
-//                 return (
-//                   <motion.div
-//                     key={log.id}
-//                     initial={{ opacity: 0, x: -10 }}
-//                     animate={{ opacity: 1, x: 0 }}
-//                     className="flex gap-3"
-//                   >
-//                     <div className={cn("flex h-7 w-7 items-center justify-center rounded-lg shrink-0", logTypeColors[log.type])}>
-//                       <Icon className="h-3.5 w-3.5" />
-//                     </div>
-//                     <div className="min-w-0">
-//                       <p className="text-xs font-medium text-foreground">{log.action}</p>
-//                       <p className="text-[10px] text-muted-foreground truncate">{log.detail}</p>
-//                       <p className="text-[10px] text-muted-foreground/60 mt-0.5">{log.time}</p>
-//                     </div>
-//                   </motion.div>
-//                 );
-//               })}
-//             </div>
-//           </motion.div>
-//         </div>
-//       </div>
-
-//       {/* Application Form Modal */}
-//       <AnimatePresence>
-//         {showForm && <ApplicationForm onSubmit={handleSubmitApplication} onClose={() => setShowForm(false)} />}
-//       </AnimatePresence>
-//     </DashboardLayout>
-//   );
-// };
-
-// export default HRAgentPage;
-
-
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 // ─── Icons (inline SVG components to avoid lucide dependency issues) ──────────
 const Icon = ({ d, size = 16, className = "" }) => (
@@ -685,14 +66,32 @@ const mockCandidates = [
   { id: 5, name: "Sneha Patel",  email: "sneha.patel@gmail.com",  phone: "+91 54321 09876", position: "Data Scientist",         location: "Chennai",   experience: "5 years", education: "MS Data Science, ISI", resumeScore: null, status: "applied",   appliedAt: "30 min ago" },
 ];
 
-const mockLogs = [
-  { id: 1, type: "apply",    action: "Application Received",    detail: "Sneha Patel applied for Data Scientist",                   time: "30 min ago" },
-  { id: 2, type: "screen",   action: "AI Screening Started",    detail: "Arjun Reddy — Full Stack Developer",                       time: "15 min ago" },
-  { id: 3, type: "schedule", action: "Interview Scheduled",     detail: "Rahul Mehta — Feb 24, 10:00 AM (Google Meet)",             time: "1 hour ago" },
-  { id: 4, type: "hire",     action: "Candidate Hired",         detail: "Ananya Gupta — Offer letter + onboarding plan sent",       time: "1 day ago"  },
-  { id: 5, type: "reject",   action: "Candidate Rejected",      detail: "Vikram Singh — DevOps Engineer — Score: 38/100",           time: "1 day ago"  },
-  { id: 6, type: "email",    action: "Shortlist Email Sent",    detail: "Priya Sharma — Score: 87/100",                             time: "2 hours ago"},
-];
+// Log type mapping from backend action strings to UI log types
+const logTypeMap: Record<string, string> = {
+  "Application Received": "apply",
+  "AI Screening": "screen",
+  "Interview Scheduled": "schedule",
+  "Candidate Hired": "hire",
+  "Candidate Rejected": "reject",
+  "Email Sent": "email",
+  "Shortlist Email": "email",
+  "Rejection Email": "email",
+  "Offer Letter": "email",
+  "Onboarding Plan": "email",
+};
+
+function guessLogType(action: string): string {
+  for (const [key, type] of Object.entries(logTypeMap)) {
+    if (action.toLowerCase().includes(key.toLowerCase())) return type;
+  }
+  if (action.toLowerCase().includes("screen") || action.toLowerCase().includes("score")) return "screen";
+  if (action.toLowerCase().includes("interview") || action.toLowerCase().includes("schedule")) return "schedule";
+  if (action.toLowerCase().includes("hire") || action.toLowerCase().includes("offer")) return "hire";
+  if (action.toLowerCase().includes("reject")) return "reject";
+  if (action.toLowerCase().includes("email") || action.toLowerCase().includes("sent")) return "email";
+  if (action.toLowerCase().includes("appl")) return "apply";
+  return "apply";
+}
 
 // ─── Score Badge ──────────────────────────────────────────────────────────────
 function ScoreBadge({ score }) {
@@ -961,7 +360,50 @@ function Toast({ message, type, onClose }) {
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function HRAgentPage() {
   const [candidates, setCandidates] = useState(mockCandidates);
-  const [logs, setLogs]             = useState(mockLogs);
+  const [logs, setLogs]             = useState<any[]>([]);
+  const [logsLoading, setLogsLoading] = useState(true);
+
+  // ── Fetch real logs from backend ──────────────────────────────────────────
+  const fetchLogs = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_BASE}/hr/logs`);
+      const data = await res.json();
+      // Support { data: [...] }, { logs: [...] }, { result: [...] }, or direct array
+      const rawLogs = Array.isArray(data) ? data : (data.data || data.logs || data.result || []);
+      const mapped = rawLogs.map((log: any, index: number) => {
+        // Format createdAt timestamp to a readable string
+        let timeStr = log.time || "";
+        if (!timeStr && (log.createdAt || log.created_at || log.timestamp)) {
+          const ts = new Date(log.createdAt || log.created_at || log.timestamp);
+          const now = new Date();
+          const diffMs = now.getTime() - ts.getTime();
+          const diffMin = Math.floor(diffMs / 60000);
+          const diffHr = Math.floor(diffMin / 60);
+          const diffDay = Math.floor(diffHr / 24);
+          if (diffMin < 1) timeStr = "Just now";
+          else if (diffMin < 60) timeStr = `${diffMin} min ago`;
+          else if (diffHr < 24) timeStr = `${diffHr} hour${diffHr > 1 ? "s" : ""} ago`;
+          else timeStr = `${diffDay} day${diffDay > 1 ? "s" : ""} ago`;
+        }
+        return {
+          id: log.id || log._id || Date.now() + index,
+          type: log.type || guessLogType(log.action || ""),
+          action: log.action || "Activity",
+          detail: log.detail || log.details || log.message || "",
+          time: timeStr,
+        };
+      });
+      setLogs(mapped);
+    } catch (err) {
+      console.error("Failed to fetch HR logs:", err);
+    } finally {
+      setLogsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchLogs();
+  }, [fetchLogs]);
   const [showForm, setShowForm]     = useState(false);
   const [filter, setFilter]         = useState("all");
   const [actionLoading, setActionLoading] = useState(null);
@@ -973,8 +415,10 @@ export default function HRAgentPage() {
     setTimeout(() => setToast(null), 4000);
   };
 
-  const addLog = (type, action, detail) => {
+  const addLog = (type: string, action: string, detail: string) => {
     setLogs(prev => [{ id: Date.now(), type, action, detail, time: "Just now" }, ...prev]);
+    // Refresh logs from backend after a short delay to capture server-side logs
+    setTimeout(() => fetchLogs(), 1500);
   };
 
   // ── Submit Application → POST /hr/apply ──────────────────────────────────
@@ -1175,7 +619,17 @@ export default function HRAgentPage() {
               <Icons.Clock size={14} style={{ color: "#00e5a0" }} /> Live Activity Log
             </h3>
             <div style={{ display: "flex", flexDirection: "column", gap: 12, maxHeight: 520, overflowY: "auto", paddingRight: 4 }}>
-              {logs.slice(0, 12).map(log => {
+              {logsLoading ? (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "32px 0", gap: 8 }}>
+                  <Icons.Loader size={16} className="spin" style={{ color: "#00e5a0" }} />
+                  <span style={{ fontSize: 12, color: "#6b7f8e" }}>Loading activity logs...</span>
+                </div>
+              ) : logs.length === 0 ? (
+                <div style={{ textAlign: "center", padding: "32px 0" }}>
+                  <Icons.Clock size={28} style={{ color: "#3d4f5c", display: "block", margin: "0 auto 8px" }} />
+                  <p style={{ fontSize: 12, color: "#6b7f8e" }}>No activity logs yet</p>
+                </div>
+              ) : logs.slice(0, 20).map(log => {
                 const LogIcon = logIcons[log.type] || Icons.Alert;
                 const col = logColors[log.type] || "#6b7f8e";
                 return (
@@ -1197,6 +651,7 @@ export default function HRAgentPage() {
             <div style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid #1a2530" }}>
               <p style={{ fontSize: 10, fontWeight: 700, color: "#3d4f5c", fontFamily: "monospace", letterSpacing: 1, textTransform: "uppercase", marginBottom: 10 }}>API Endpoints</p>
               {[
+                { method: "GET",  path: "/hr/logs",               color: "#00e5a0" },
                 { method: "POST", path: "/hr/apply",              color: "#60a5fa" },
                 { method: "POST", path: "/hr/schedule-interview", color: "#a78bfa" },
                 { method: "POST", path: "/hr/hire",               color: "#4ade80" },
