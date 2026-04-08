@@ -409,23 +409,34 @@ export default function HRAgentPage() {
       setCandidatesLoading(true);
       const res = await fetch(`${API_BASE}/hr/candidates`);
       const data = await res.json();
+      console.log("🔍 RAW API RESPONSE /hr/candidates:", data);
       const rawCandidates = data.data || data.candidates || data.result || [];
-      const mapped = rawCandidates.map((c: any) => ({
-        id: c._id || c.id || Date.now(),
-        name: c.candidateName || c.name || "Unknown",
-        email: c.email || "—",
-        phone: c.phone || "—",
-        position: c.jobRole || c.position || "—",
-        location: c.location || "—",
-        experience: c.experience || "—",
-        education: c.education || "—",
-        resumeScore: c.score || c.resumeScore || null,
-        status: c.status || "applied",
-        appliedAt: formatTimeAgo(c.createdAt || c.created_at || new Date()),
-        interviewDate: c.interviewDate || null,
-        meetLink: c.meetLink || null,
-        notes: c.summary || c.notes || "",
-      }));
+      console.log("📦 RAW CANDIDATES ARRAY:", rawCandidates);
+      const mapped = rawCandidates.map((c: any) => {
+        console.log("🔄 MAPPING CANDIDATE:", {
+          email: c.email,
+          score_from_db: c.score,
+          resumeScore_from_db: c.resumeScore,
+          status: c.status,
+        });
+        return {
+          id: c._id || c.id || Date.now(),
+          name: c.candidateName || c.name || "Unknown",
+          email: c.email || "—",
+          phone: c.phone || "—",
+          position: c.jobRole || c.position || "—",
+          location: c.location || "—",
+          experience: c.experience || "—",
+          education: c.education || "—",
+          resumeScore: c.score || c.resumeScore || null,
+          status: c.status || "applied",
+          appliedAt: formatTimeAgo(c.createdAt || c.created_at || new Date()),
+          interviewDate: c.interviewDate || null,
+          meetLink: c.meetLink || null,
+          notes: c.summary || c.notes || "",
+        };
+      });
+      console.log("✅ MAPPED CANDIDATES FOR DISPLAY:", mapped);
       setCandidates(mapped);
     } catch (err) {
       console.error("Failed to fetch candidates:", err);
@@ -462,7 +473,7 @@ export default function HRAgentPage() {
     const interval = setInterval(() => {
       fetchCandidates();
       fetchLogs();
-    }, 10000);
+    }, 1000000);
     return () => clearInterval(interval);
   }, [fetchCandidates, fetchLogs]);
 
