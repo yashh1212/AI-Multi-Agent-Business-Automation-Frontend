@@ -34,7 +34,7 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden flex items-center justify-center">
+    <div className="dark min-h-screen bg-background text-foreground relative overflow-hidden flex items-center justify-center">
       {/* Animated background orbs */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div

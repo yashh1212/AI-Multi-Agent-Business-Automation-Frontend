@@ -11,9 +11,10 @@ import {
   Sparkles,
   Shield,
   Clock,
+  Loader2,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { dashboardStats } from "@/data/mockData";
+import { useDashboard } from "@/lib/api";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -24,6 +25,14 @@ const itemVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0 },
 };
+
+const SkeletonCard = () => (
+  <div className="glass-card rounded-2xl p-4 text-center animate-pulse">
+    <div className="h-5 w-5 mx-auto mb-2 bg-muted rounded" />
+    <div className="h-8 w-12 mx-auto bg-muted rounded mb-2" />
+    <div className="h-3 w-20 mx-auto bg-muted rounded" />
+  </div>
+);
 
 const quickActions = [
   {
@@ -61,8 +70,15 @@ const quickActions = [
 ];
 
 const LandingPage = () => {
+  
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { data, isLoading, error, dataUpdatedAt } = useDashboard();
+    const stats = data?.stats;
+    const chartData = data?.chartData;
+    const agents = data?.agents;
+  
+    const runningAgents = agents?.filter(a => a.status === "running" || a.status === "thinking") || [];
 
   const handleLogout = () => {
     logout();
@@ -109,13 +125,21 @@ const LandingPage = () => {
             NexusAI
           </span>
         </div>
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-        >
-          <LogOut className="h-4 w-4" />
-          <span className="hidden sm:inline">Sign out</span>
-        </button>
+        <div className="flex items-center gap-4">
+          {dataUpdatedAt > 0 && (
+            <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+              {isLoading && <Loader2 className="h-3 w-3 animate-spin" />}
+              Live · refreshes every 30s
+            </span>
+          )}
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+          >
+            <LogOut className="h-4 w-4" />
+            <span className="hidden sm:inline">Sign out</span>
+          </button>
+        </div>
       </header>
 
       {/* Main content */}
@@ -146,30 +170,59 @@ const LandingPage = () => {
           </p>
         </motion.div>
 
+        {error && (
+          <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive mb-6">
+            Failed to load dashboard data. Retrying...
+          </div>
+        )}
+
         {/* Quick Stats */}
         <motion.div
           variants={itemVariants}
           className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-10"
         >
-          {[
-            { label: "Active Agents", value: `${dashboardStats.activeAgents}/${dashboardStats.totalAgents}`, icon: Bot, color: "text-primary" },
-            { label: "Workflows", value: dashboardStats.runningWorkflows, icon: GitBranch, color: "text-accent" },
-            { label: "Completed Today", value: dashboardStats.completedToday, icon: Clock, color: "text-warning" },
-            { label: "System Health", value: "99.9%", icon: Shield, color: "text-success" },
-          ].map((stat) => (
-            <div
-              key={stat.label}
-              className="glass-card rounded-2xl p-4 text-center"
-            >
-              <stat.icon className={`h-5 w-5 mx-auto mb-2 ${stat.color}`} />
-              <div className="text-xl md:text-2xl font-bold text-foreground">
-                {stat.value}
+          {isLoading && !stats ? (
+            Array(4).fill(0).map((_, i) => <SkeletonCard key={i} />)
+          ) : (
+            <>
+              <div className="glass-card rounded-2xl p-4 text-center">
+                <Bot className="h-5 w-5 mx-auto mb-2 text-primary" />
+                <div className="text-xl md:text-2xl font-bold text-foreground">
+                  {runningAgents.length || 0}
+                </div>
+                <div className="text-xs text-muted-foreground mt-0.5">
+                  Active Agents
+                </div>
               </div>
-              <div className="text-xs text-muted-foreground mt-0.5">
-                {stat.label}
+              <div className="glass-card rounded-2xl p-4 text-center">
+                <GitBranch className="h-5 w-5 mx-auto mb-2 text-accent" />
+                <div className="text-xl md:text-2xl font-bold text-foreground">
+                  {stats?.interviewScheduled || 0}
+                </div>
+                <div className="text-xs text-muted-foreground mt-0.5">
+                  In Progress
+                </div>
               </div>
-            </div>
-          ))}
+              <div className="glass-card rounded-2xl p-4 text-center">
+                <Clock className="h-5 w-5 mx-auto mb-2 text-warning" />
+                <div className="text-xl md:text-2xl font-bold text-foreground">
+                  {stats?.completedToday || 0}
+                </div>
+                <div className="text-xs text-muted-foreground mt-0.5">
+                  Completed Today
+                </div>
+              </div>
+              <div className="glass-card rounded-2xl p-4 text-center">
+                <Shield className="h-5 w-5 mx-auto mb-2 text-success" />
+                <div className="text-xl md:text-2xl font-bold text-foreground">
+                  99.9%
+                </div>
+                <div className="text-xs text-muted-foreground mt-0.5">
+                  System Health
+                </div>
+              </div>
+            </>
+          )}
         </motion.div>
 
         {/* Agent Dashboard CTA */}

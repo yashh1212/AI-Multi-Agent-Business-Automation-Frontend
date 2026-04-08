@@ -106,13 +106,13 @@ function ScoreBadge({ score }) {
 }
 
 // ─── KPI Card ─────────────────────────────────────────────────────────────────
-function KpiCard({ title, value, sub, color = "#00e5a0", IconComp }) {
+function KpiCard({ title, value, sub, color = "#0099dd", IconComp }) {
   return (
-    <div style={{ background: "#0f1318", border: "1px solid #1e2830", borderRadius: 16, padding: "18px 20px" }}>
+    <div style={{ background: "#101824", border: "1px solid #1a2530", borderRadius: 16, padding: "18px 20px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
         <div>
           <p style={{ fontSize: 11, color: "#6b7f8e", marginBottom: 6, fontFamily: "monospace", letterSpacing: 1, textTransform: "uppercase" }}>{title}</p>
-          <p style={{ fontSize: 28, fontWeight: 800, color: "#e8edf2" }}>{value}</p>
+          <p style={{ fontSize: 28, fontWeight: 800, color: "#f0f6fc" }}>{value}</p>
           {sub && <p style={{ fontSize: 11, color: "#6b7f8e", marginTop: 4 }}>{sub}</p>}
         </div>
         <div style={{ width: 40, height: 40, borderRadius: 12, background: `${color}18`, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -125,8 +125,15 @@ function KpiCard({ title, value, sub, color = "#00e5a0", IconComp }) {
 
 // ─── Application Form Modal ───────────────────────────────────────────────────
 function ApplicationForm({ onSubmit, onClose, loading }) {
-  const [form, setForm] = useState({ name: "", email: "", phone: "", position: "", location: "", experience: "", education: "", resumeText: "" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "", position: "", location: "", experience: "", education: "", resumeText: "", resumeFile: null });
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      set("resumeFile", file);
+    }
+  };
 
   const fields = [
     { key: "name",       label: "Full Name",        Icon: Icons.User,      placeholder: "John Doe",              type: "text" },
@@ -139,15 +146,15 @@ function ApplicationForm({ onSubmit, onClose, loading }) {
   ];
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(8,11,15,0.85)", backdropFilter: "blur(8px)", padding: 16 }} onClick={onClose}>
-      <div style={{ background: "#0f1318", border: "1px solid #1e2830", borderRadius: 20, padding: 28, width: "100%", maxWidth: 520, maxHeight: "90vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
-        <h2 style={{ fontSize: 18, fontWeight: 800, color: "#e8edf2", display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
+    <div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(13,22,33,0.85)", backdropFilter: "blur(8px)", padding: 16 }} onClick={onClose}>
+      <div style={{ background: "#101824", border: "1px solid #1a2530", borderRadius: 20, padding: 28, width: "100%", maxWidth: 520, maxHeight: "90vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
+        <h2 style={{ fontSize: 18, fontWeight: 800, color: "#f0f6fc", display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
           <Icons.UserPlus size={20} /> New Application
         </h2>
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           {fields.map(f => (
             <div key={f.key}>
-              <label style={{ fontSize: 11, fontWeight: 600, color: "#e8edf2", display: "block", marginBottom: 5 }}>{f.label}</label>
+              <label style={{ fontSize: 11, fontWeight: 600, color: "#f0f6fc", display: "block", marginBottom: 5 }}>{f.label}</label>
               <div style={{ position: "relative" }}>
                 <div style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "#6b7f8e", pointerEvents: "none" }}>
                   <f.Icon size={14} />
@@ -157,30 +164,48 @@ function ApplicationForm({ onSubmit, onClose, loading }) {
                   value={form[f.key]}
                   onChange={e => set(f.key, e.target.value)}
                   placeholder={f.placeholder}
-                  style={{ width: "100%", background: "#161c24", border: "1px solid #1e2830", borderRadius: 10, padding: "10px 12px 10px 34px", fontSize: 13, color: "#e8edf2", outline: "none", boxSizing: "border-box" }}
+                  style={{ width: "100%", background: "#1a2530", border: "1px solid #1a2530", borderRadius: 10, padding: "10px 12px 10px 34px", fontSize: 13, color: "#f0f6fc", outline: "none", boxSizing: "border-box" }}
                 />
               </div>
             </div>
           ))}
           <div>
-            <label style={{ fontSize: 11, fontWeight: 600, color: "#e8edf2", display: "block", marginBottom: 5 }}>Resume / Skills Summary</label>
+            <label style={{ fontSize: 11, fontWeight: 600, color: "#f0f6fc", display: "block", marginBottom: 8 }}>Upload Resume (PDF, DOC)</label>
+            <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 12, padding: "14px 12px", background: "#1a2530", border: "1px dashed #0099dd40", borderRadius: 10, cursor: "pointer", transition: "all 0.2s" }}>
+              <Icons.Upload size={16} style={{ color: "#0099dd", flexShrink: 0 }} />
+              <div style={{ flex: 1 }}>
+                <input
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  onChange={handleFileChange}
+                  style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer" }}
+                />
+                <p style={{ fontSize: 13, color: "#f0f6fc", fontWeight: 500 }}>
+                  {form.resumeFile ? form.resumeFile.name : "Click to upload or drag and drop"}
+                </p>
+                {!form.resumeFile && <p style={{ fontSize: 10, color: "#6b7f8e", marginTop: 2 }}>PDF, DOC or DOCX (Max 5MB)</p>}
+              </div>
+            </div>
+          </div>
+          <div>
+            <label style={{ fontSize: 11, fontWeight: 600, color: "#f0f6fc", display: "block", marginBottom: 5 }}>Resume / Skills Summary (Optional)</label>
             <textarea
               value={form.resumeText}
               onChange={e => set("resumeText", e.target.value)}
               placeholder="Paste resume text or summarize skills, experience, and achievements..."
               rows={4}
-              style={{ width: "100%", background: "#161c24", border: "1px solid #1e2830", borderRadius: 10, padding: "10px 12px", fontSize: 13, color: "#e8edf2", outline: "none", resize: "vertical", boxSizing: "border-box", fontFamily: "inherit" }}
+              style={{ width: "100%", background: "#1a2530", border: "1px solid #1a2530", borderRadius: 10, padding: "10px 12px", fontSize: 13, color: "#f0f6fc", outline: "none", resize: "vertical", boxSizing: "border-box", fontFamily: "inherit" }}
             />
           </div>
         </div>
         <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
-          <button onClick={onClose} style={{ flex: 1, background: "transparent", border: "1px solid #1e2830", borderRadius: 10, padding: "10px 0", fontSize: 13, color: "#6b7f8e", cursor: "pointer", fontWeight: 600 }}>
+          <button onClick={onClose} style={{ flex: 1, background: "transparent", border: "1px solid #1a2530", borderRadius: 10, padding: "10px 0", fontSize: 13, color: "#6b7f8e", cursor: "pointer", fontWeight: 600 }}>
             Cancel
           </button>
           <button
             onClick={() => { if (form.name && form.email && form.position) onSubmit(form); }}
             disabled={loading || !form.name || !form.email || !form.position}
-            style={{ flex: 2, background: "#00e5a0", border: "none", borderRadius: 10, padding: "10px 0", fontSize: 13, color: "#080b0f", cursor: "pointer", fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, opacity: (!form.name || !form.email || !form.position) ? 0.5 : 1 }}
+            style={{ flex: 2, background: "#0099dd", border: "none", borderRadius: 10, padding: "10px 0", fontSize: 13, color: "#fff", cursor: "pointer", fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, opacity: (!form.name || !form.email || !form.position) ? 0.5 : 1 }}
           >
             {loading ? <><Icons.Loader size={14} className="spin" /> Submitting...</> : <><Icons.Send size={14} /> Submit Application</>}
           </button>
@@ -197,16 +222,16 @@ function CandidateCard({ candidate, onAction, actionLoading }) {
   const isLoading = actionLoading === candidate.id;
 
   return (
-    <div style={{ background: "#0f1318", border: "1px solid #1e2830", borderRadius: 16, overflow: "hidden", transition: "border-color 0.2s" }}>
+    <div style={{ background: "#101824", border: "1px solid #1a2530", borderRadius: 16, overflow: "hidden", transition: "border-color 0.2s" }}>
       <div style={{ padding: "18px 20px" }}>
         {/* Top Row */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
-            <div style={{ width: 40, height: 40, borderRadius: 12, background: "rgba(0,229,160,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <Icons.User size={18} style={{ color: "#00e5a0" }} />
+            <div style={{ width: 40, height: 40, borderRadius: 12, background: "rgba(0,153,221,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <Icons.User size={18} style={{ color: "#0099dd" }} />
             </div>
             <div style={{ minWidth: 0 }}>
-              <p style={{ fontSize: 14, fontWeight: 700, color: "#e8edf2", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{candidate.name}</p>
+              <p style={{ fontSize: 14, fontWeight: 700, color: "#f0f6fc", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{candidate.name}</p>
               <p style={{ fontSize: 12, color: "#6b7f8e", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{candidate.position}</p>
             </div>
           </div>
@@ -236,9 +261,9 @@ function CandidateCard({ candidate, onAction, actionLoading }) {
           <div style={{ marginTop: 12, background: "rgba(167,139,250,0.05)", border: "1px solid rgba(167,139,250,0.15)", borderRadius: 10, padding: "10px 12px", display: "flex", alignItems: "center", gap: 10 }}>
             <Icons.Calendar size={14} style={{ color: "#a78bfa", flexShrink: 0 }} />
             <div>
-              <p style={{ fontSize: 12, fontWeight: 600, color: "#e8edf2" }}>{candidate.interviewDate}</p>
+              <p style={{ fontSize: 12, fontWeight: 600, color: "#f0f6fc" }}>{candidate.interviewDate}</p>
               {candidate.meetLink && (
-                <a href={candidate.meetLink} target="_blank" rel="noreferrer" style={{ fontSize: 10, color: "#00e5a0", textDecoration: "none", display: "flex", alignItems: "center", gap: 4, marginTop: 2 }}>
+                <a href={candidate.meetLink} target="_blank" rel="noreferrer" style={{ fontSize: 10, color: "#0099dd", textDecoration: "none", display: "flex", alignItems: "center", gap: 4, marginTop: 2 }}>
                   <Icons.Video size={10} /> Join Google Meet
                 </a>
               )}
@@ -258,7 +283,7 @@ function CandidateCard({ candidate, onAction, actionLoading }) {
         <div style={{ padding: "0 20px 20px", borderTop: "1px solid #1a2530" }}>
           {candidate.notes && (
             <p style={{ fontSize: 12, color: "#6b7f8e", paddingTop: 14, paddingBottom: 10 }}>
-              <span style={{ fontWeight: 700, color: "#e8edf2" }}>AI Notes: </span>{candidate.notes}
+              <span style={{ fontWeight: 700, color: "#f0f6fc" }}>AI Notes: </span>{candidate.notes}
             </p>
           )}
           <div style={{ display: "flex", gap: 16, fontSize: 11, color: "#6b7f8e", marginBottom: 12 }}>
@@ -335,7 +360,7 @@ function FlowDiagram() {
             <div style={{ width: 44, height: 44, borderRadius: 14, background: s.color + "18", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <s.Icon size={20} style={{ color: s.color }} />
             </div>
-            <span style={{ fontSize: 12, fontWeight: 700, color: "#e8edf2" }}>{s.label}</span>
+            <span style={{ fontSize: 12, fontWeight: 700, color: "#f0f6fc" }}>{s.label}</span>
             <span style={{ fontSize: 10, color: "#6b7f8e", fontFamily: "monospace" }}>{s.desc}</span>
           </div>
           {i < steps.length - 1 && <Icons.Arrow size={16} style={{ color: "#3d4f5c", flexShrink: 0, marginBottom: 18 }} />}
@@ -347,11 +372,11 @@ function FlowDiagram() {
 
 // ─── Toast ────────────────────────────────────────────────────────────────────
 function Toast({ message, type, onClose }) {
-  const colors = { success: "#00e5a0", error: "#f87171", info: "#60a5fa" };
+  const colors = { success: "#0099dd", error: "#f87171", info: "#60a5fa" };
   return (
-    <div style={{ position: "fixed", bottom: 24, right: 24, zIndex: 999, background: "#0f1318", border: `1px solid ${colors[type]}40`, borderRadius: 12, padding: "14px 18px", display: "flex", alignItems: "center", gap: 12, boxShadow: `0 8px 32px ${colors[type]}20`, maxWidth: 380, animation: "slideIn 0.3s ease" }}>
+    <div style={{ position: "fixed", bottom: 24, right: 24, zIndex: 999, background: "#101824", border: `1px solid ${colors[type]}40`, borderRadius: 12, padding: "14px 18px", display: "flex", alignItems: "center", gap: 12, boxShadow: `0 8px 32px ${colors[type]}20`, maxWidth: 380, animation: "slideIn 0.3s ease" }}>
       <div style={{ width: 8, height: 8, borderRadius: "50%", background: colors[type], flexShrink: 0 }} />
-      <p style={{ fontSize: 13, color: "#e8edf2", flex: 1 }}>{message}</p>
+      <p style={{ fontSize: 13, color: "#f0f6fc", flex: 1 }}>{message}</p>
       <button onClick={onClose} style={{ background: "none", border: "none", color: "#6b7f8e", cursor: "pointer", fontSize: 16, lineHeight: 1 }}>×</button>
     </div>
   );
@@ -425,16 +450,31 @@ export default function HRAgentPage() {
   const handleSubmitApplication = async (form) => {
     setFormLoading(true);
     try {
-      const res = await apiCall("/hr/apply", {
-        name:       form.name,
-        email:      form.email,
-        role:       form.position,
-        salary:     "To be discussed",
-        startDate:  "To be confirmed",
-        resumeText: form.resumeText || `${form.experience} experience. ${form.education}.`,
-      });
+      // Use FormData to handle file upload if present
+      const formData = new FormData();
+      formData.append("name", form.name);
+      formData.append("email", form.email);
+      formData.append("role", form.position);
+      formData.append("salary", "To be discussed");
+      formData.append("startDate", "To be confirmed");
+      formData.append("phone", form.phone);
+      formData.append("location", form.location);
+      formData.append("experience", form.experience);
+      formData.append("education", form.education);
+      formData.append("resumeText", form.resumeText || `${form.experience} experience. ${form.education}.`);
+      if (form.resumeFile) {
+        formData.append("resume", form.resumeFile);
+      }
 
-      const screening = res.result?.screening;
+      const res = await fetch(`${API_BASE}/hr/apply`, {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "API error");
+      const result = data.result || data;
+
+      const screening = result.screening;
       const score     = screening?.score ?? null;
       const decision  = screening?.decision ?? "pending";
       const newStatus = decision === "selected" ? "shortlisted" : decision === "rejected" ? "rejected" : "applied";
@@ -532,45 +572,45 @@ export default function HRAgentPage() {
   const filtered = filter === "all" ? candidates : candidates.filter(c => c.status === filter);
   const counts   = candidates.reduce((a, c) => ({ ...a, [c.status]: (a[c.status] || 0) + 1 }), {});
 
-  const logColors = { apply: "#60a5fa", screen: "#fbbf24", schedule: "#a78bfa", hire: "#4ade80", reject: "#f87171", email: "#00e5a0" };
+  const logColors = { apply: "#60a5fa", screen: "#fbbf24", schedule: "#a78bfa", hire: "#4ade80", reject: "#f87171", email: "#0099dd" };
   const logIcons  = { apply: Icons.UserPlus, screen: Icons.Brain, schedule: Icons.Calendar, hire: Icons.Trophy, reject: Icons.X, email: Icons.Mail };
 
   return (
     <>
       <style>{`
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #080b0f; color: #e8edf2; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0d1621; color: #f0f6fc; }
         .spin { animation: spin 1s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #1e2830; border-radius: 4px; }
-        input:focus, textarea:focus { border-color: #00e5a0 !important; }
+        ::-webkit-scrollbar-thumb { background: #1a2530; border-radius: 4px; }
+        input:focus, textarea:focus { border-color: #0099dd !important; }
       `}</style>
 
-      <div style={{ minHeight: "100vh", background: "#080b0f", padding: "28px 24px", maxWidth: 1400, margin: "0 auto" }}>
+      <div style={{ minHeight: "100vh", background: "#0d1621", padding: "28px 24px", maxWidth: 1400, margin: "0 auto" }}>
 
         {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28, flexWrap: "wrap", gap: 16 }}>
           <div>
-            <h1 style={{ fontSize: 26, fontWeight: 800, color: "#e8edf2", display: "flex", alignItems: "center", gap: 10 }}>
-              <Icons.Sparkles size={26} style={{ color: "#00e5a0" }} /> HR Agent
+            <h1 style={{ fontSize: 26, fontWeight: 800, color: "#f0f6fc", display: "flex", alignItems: "center", gap: 10 }}>
+              <Icons.Sparkles size={26} style={{ color: "#0099dd" }} /> HR Agent
             </h1>
             <p style={{ fontSize: 13, color: "#6b7f8e", marginTop: 4 }}>AI-powered hiring — screen resumes, schedule interviews, send offers & onboard</p>
           </div>
           <button
             onClick={() => setShowForm(true)}
-            style={{ display: "flex", alignItems: "center", gap: 8, background: "#00e5a0", border: "none", borderRadius: 12, padding: "11px 20px", fontSize: 13, fontWeight: 800, color: "#080b0f", cursor: "pointer", boxShadow: "0 4px 20px rgba(0,229,160,0.3)" }}
+            style={{ display: "flex", alignItems: "center", gap: 8, background: "#0099dd", border: "none", borderRadius: 12, padding: "11px 20px", fontSize: 13, fontWeight: 800, color: "#fff", cursor: "pointer", boxShadow: "0 4px 20px rgba(0,153,221,0.3)" }}
           >
             <Icons.UserPlus size={16} /> New Application
           </button>
         </div>
 
         {/* Flow Diagram */}
-        <div style={{ background: "#0f1318", border: "1px solid #1e2830", borderRadius: 16, padding: "18px 20px", marginBottom: 24 }}>
-          <p style={{ fontSize: 12, fontWeight: 700, color: "#e8edf2", marginBottom: 14, display: "flex", alignItems: "center", gap: 6 }}>
-            <Icons.Arrow size={14} style={{ color: "#00e5a0" }} /> HR Agent Workflow
+        <div style={{ background: "#101824", border: "1px solid #1a2530", borderRadius: 16, padding: "18px 20px", marginBottom: 24 }}>
+          <p style={{ fontSize: 12, fontWeight: 700, color: "#f0f6fc", marginBottom: 14, display: "flex", alignItems: "center", gap: 6 }}>
+            <Icons.Arrow size={14} style={{ color: "#0099dd" }} /> HR Agent Workflow
           </p>
           <FlowDiagram />
         </div>
@@ -590,7 +630,7 @@ export default function HRAgentPage() {
             <button
               key={tab.key}
               onClick={() => setFilter(tab.key)}
-              style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 14px", borderRadius: 20, fontSize: 12, fontWeight: 600, border: `1px solid ${filter === tab.key ? "#00e5a030" : "#1e2830"}`, background: filter === tab.key ? "rgba(0,229,160,0.08)" : "transparent", color: filter === tab.key ? "#00e5a0" : "#6b7f8e", cursor: "pointer", transition: "all 0.15s" }}
+              style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 14px", borderRadius: 20, fontSize: 12, fontWeight: 600, border: `1px solid ${filter === tab.key ? "#0099dd30" : "#1a2530"}`, background: filter === tab.key ? "rgba(0,153,221,0.08)" : "transparent", color: filter === tab.key ? "#0099dd" : "#6b7f8e", cursor: "pointer", transition: "all 0.15s" }}
             >
               {tab.label}
               <span style={{ fontSize: 10, fontWeight: 800, padding: "1px 5px", borderRadius: 8, background: filter === tab.key ? "rgba(0,229,160,0.15)" : "#161c24" }}>{tab.count}</span>
@@ -604,7 +644,7 @@ export default function HRAgentPage() {
           {/* Candidate Cards */}
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             {filtered.length === 0 ? (
-              <div style={{ background: "#0f1318", border: "1px solid #1e2830", borderRadius: 16, padding: "48px 24px", textAlign: "center" }}>
+              <div style={{ background: "#101824", border: "1px solid #1a2530", borderRadius: 16, padding: "48px 24px", textAlign: "center" }}>
                 <Icons.UserPlus size={40} style={{ color: "#3d4f5c", display: "block", margin: "0 auto 12px" }} />
                 <p style={{ fontSize: 13, color: "#6b7f8e" }}>No candidates with this status</p>
               </div>
@@ -614,14 +654,14 @@ export default function HRAgentPage() {
           </div>
 
           {/* Activity Log */}
-          <div style={{ background: "#0f1318", border: "1px solid #1e2830", borderRadius: 16, padding: "18px 20px", position: "sticky", top: 24 }}>
-            <h3 style={{ fontSize: 13, fontWeight: 700, color: "#e8edf2", marginBottom: 16, display: "flex", alignItems: "center", gap: 6 }}>
-              <Icons.Clock size={14} style={{ color: "#00e5a0" }} /> Live Activity Log
+          <div style={{ background: "#101824", border: "1px solid #1a2530", borderRadius: 16, padding: "18px 20px", position: "sticky", top: 24 }}>
+            <h3 style={{ fontSize: 13, fontWeight: 700, color: "#f0f6fc", marginBottom: 16, display: "flex", alignItems: "center", gap: 6 }}>
+              <Icons.Clock size={14} style={{ color: "#0099dd" }} /> Live Activity Log
             </h3>
             <div style={{ display: "flex", flexDirection: "column", gap: 12, maxHeight: 520, overflowY: "auto", paddingRight: 4 }}>
               {logsLoading ? (
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "32px 0", gap: 8 }}>
-                  <Icons.Loader size={16} className="spin" style={{ color: "#00e5a0" }} />
+                  <Icons.Loader size={16} className="spin" style={{ color: "#0099dd" }} />
                   <span style={{ fontSize: 12, color: "#6b7f8e" }}>Loading activity logs...</span>
                 </div>
               ) : logs.length === 0 ? (
@@ -638,7 +678,7 @@ export default function HRAgentPage() {
                       <LogIcon size={13} style={{ color: col }} />
                     </div>
                     <div style={{ minWidth: 0 }}>
-                      <p style={{ fontSize: 12, fontWeight: 600, color: "#e8edf2" }}>{log.action}</p>
+                      <p style={{ fontSize: 12, fontWeight: 600, color: "#f0f6fc" }}>{log.action}</p>
                       <p style={{ fontSize: 11, color: "#6b7f8e", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{log.detail}</p>
                       <p style={{ fontSize: 10, color: "#3d4f5c", marginTop: 2 }}>{log.time}</p>
                     </div>
@@ -651,7 +691,7 @@ export default function HRAgentPage() {
             <div style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid #1a2530" }}>
               <p style={{ fontSize: 10, fontWeight: 700, color: "#3d4f5c", fontFamily: "monospace", letterSpacing: 1, textTransform: "uppercase", marginBottom: 10 }}>API Endpoints</p>
               {[
-                { method: "GET",  path: "/hr/logs",               color: "#00e5a0" },
+                { method: "GET",  path: "/hr/logs",               color: "#0099dd" },
                 { method: "POST", path: "/hr/apply",              color: "#60a5fa" },
                 { method: "POST", path: "/hr/schedule-interview", color: "#a78bfa" },
                 { method: "POST", path: "/hr/hire",               color: "#4ade80" },
