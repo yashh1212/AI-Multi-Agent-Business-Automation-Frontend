@@ -57,14 +57,21 @@ const statusConfig = {
   rejected:             { label: "Rejected",             color: "#f87171", bg: "rgba(248,113,113,0.1)", Icon: Icons.X },
 };
 
-// ─── Initial Mock Data ────────────────────────────────────────────────────────
-const mockCandidates = [
-  { id: 1, name: "Priya Sharma", email: "priya.sharma@gmail.com", phone: "+91 98765 43210", position: "Senior Frontend Developer", location: "Bangalore", experience: "6 years", education: "B.Tech CSE, IIT Delhi", resumeScore: 87, status: "shortlisted", appliedAt: "2 hours ago", notes: "Strong React & TypeScript. Led 3 major product launches." },
-  { id: 2, name: "Rahul Mehta",  email: "rahul.mehta@outlook.com", phone: "+91 87654 32109", position: "Backend Engineer", location: "Mumbai", experience: "4 years", education: "M.Tech, BITS Pilani", resumeScore: 72, status: "interview_scheduled", appliedAt: "5 hours ago", interviewDate: "Feb 26, 2026 — 10:00 AM", meetLink: "https://meet.google.com/abc-defg-hij" },
-  { id: 3, name: "Ananya Gupta", email: "ananya.g@yahoo.com",     phone: "+91 76543 21098", position: "UI/UX Designer",         location: "Pune",      experience: "3 years", education: "BDes, NID Ahmedabad", resumeScore: 91, status: "hired",     appliedAt: "1 day ago",   notes: "Exceptional portfolio. Figma expert." },
-  { id: 4, name: "Vikram Singh", email: "vikram.s@gmail.com",     phone: "+91 65432 10987", position: "DevOps Engineer",        location: "Hyderabad", experience: "2 years", education: "B.Tech IT, VIT", resumeScore: 38, status: "rejected",  appliedAt: "1 day ago",   notes: "Limited CI/CD experience." },
-  { id: 5, name: "Sneha Patel",  email: "sneha.patel@gmail.com",  phone: "+91 54321 09876", position: "Data Scientist",         location: "Chennai",   experience: "5 years", education: "MS Data Science, ISI", resumeScore: null, status: "applied",   appliedAt: "30 min ago" },
-];
+// ─── Utility: Time difference formatter ────────────────────────────────────────
+function formatTimeAgo(timestamp: string | Date): string {
+  if (!timestamp) return "Unknown";
+  const ts = new Date(timestamp);
+  const now = new Date();
+  const diffMs = now.getTime() - ts.getTime();
+  const diffMin = Math.floor(diffMs / 60000);
+  const diffHr = Math.floor(diffMin / 60);
+  const diffDay = Math.floor(diffHr / 24);
+  if (diffMin < 1) return "Just now";
+  if (diffMin < 60) return `${diffMin} min ago`;
+  if (diffHr < 24) return `${diffHr} hour${diffHr > 1 ? "s" : ""} ago`;
+  if (diffDay < 7) return `${diffDay} day${diffDay > 1 ? "s" : ""} ago`;
+  return ts.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+}
 
 // Log type mapping from backend action strings to UI log types
 const logTypeMap: Record<string, string> = {
@@ -384,56 +391,80 @@ function Toast({ message, type, onClose }) {
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function HRAgentPage() {
-  const [candidates, setCandidates] = useState(mockCandidates);
-  const [logs, setLogs]             = useState<any[]>([]);
+  const [candidates, setCandidates] = useState<any[]>([]);
+  const [logs, setLogs] = useState<any[]>([]);
+  const [candidatesLoading, setCandidatesLoading] = useState(true);
   const [logsLoading, setLogsLoading] = useState(true);
+  const [filter, setFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [roleFilter, setRoleFilter] = useState("");
+  const [showForm, setShowForm] = useState(false);
+  const [actionLoading, setActionLoading] = useState(null);
+  const [formLoading, setFormLoading] = useState(false);
+  const [toast, setToast] = useState(null);
 
-  // ── Fetch real logs from backend ──────────────────────────────────────────
+  // ── Fetch candidates from /hr/candidates endpoint ──────────────────────────
+  const fetchCandidates = useCallback(async () => {
+    try {
+      setCandidatesLoading(true);
+      const res = await fetch(`${API_BASE}/hr/candidates`);
+      const data = await res.json();
+      const rawCandidates = data.data || data.candidates || data.result || [];
+      const mapped = rawCandidates.map((c: any) => ({
+        id: c._id || c.id || Date.now(),
+        name: c.candidateName || c.name || "Unknown",
+        email: c.email || "—",
+        phone: c.phone || "—",
+        position: c.jobRole || c.position || "—",
+        location: c.location || "—",
+        experience: c.experience || "—",
+        education: c.education || "—",
+        resumeScore: c.score || c.resumeScore || null,
+        status: c.status || "applied",
+        appliedAt: formatTimeAgo(c.createdAt || c.created_at || new Date()),
+        interviewDate: c.interviewDate || null,
+        meetLink: c.meetLink || null,
+        notes: c.summary || c.notes || "",
+      }));
+      setCandidates(mapped);
+    } catch (err) {
+      console.error("Failed to fetch candidates:", err);
+    } finally {
+      setCandidatesLoading(false);
+    }
+  }, []);
+
+  // ── Fetch logs from backend ──────────────────────────────────────────────────
   const fetchLogs = useCallback(async () => {
     try {
       const res = await fetch(`${API_BASE}/hr/logs`);
       const data = await res.json();
-      // Support { data: [...] }, { logs: [...] }, { result: [...] }, or direct array
       const rawLogs = Array.isArray(data) ? data : (data.data || data.logs || data.result || []);
-      const mapped = rawLogs.map((log: any, index: number) => {
-        // Format createdAt timestamp to a readable string
-        let timeStr = log.time || "";
-        if (!timeStr && (log.createdAt || log.created_at || log.timestamp)) {
-          const ts = new Date(log.createdAt || log.created_at || log.timestamp);
-          const now = new Date();
-          const diffMs = now.getTime() - ts.getTime();
-          const diffMin = Math.floor(diffMs / 60000);
-          const diffHr = Math.floor(diffMin / 60);
-          const diffDay = Math.floor(diffHr / 24);
-          if (diffMin < 1) timeStr = "Just now";
-          else if (diffMin < 60) timeStr = `${diffMin} min ago`;
-          else if (diffHr < 24) timeStr = `${diffHr} hour${diffHr > 1 ? "s" : ""} ago`;
-          else timeStr = `${diffDay} day${diffDay > 1 ? "s" : ""} ago`;
-        }
-        return {
-          id: log.id || log._id || Date.now() + index,
-          type: log.type || guessLogType(log.action || ""),
-          action: log.action || "Activity",
-          detail: log.detail || log.details || log.message || "",
-          time: timeStr,
-        };
-      });
+      const mapped = rawLogs.map((log: any, index: number) => ({
+        id: log.id || log._id || Date.now() + index,
+        type: log.type || guessLogType(log.action || ""),
+        action: log.action || "Activity",
+        detail: log.detail || log.details || log.message || "",
+        time: formatTimeAgo(log.createdAt || log.created_at || log.timestamp),
+      }));
       setLogs(mapped);
     } catch (err) {
-      console.error("Failed to fetch HR logs:", err);
+      console.error("Failed to fetch logs:", err);
     } finally {
       setLogsLoading(false);
     }
   }, []);
 
+  // ── Initial load and auto-refresh every 10 seconds ───────────────────────
   useEffect(() => {
+    fetchCandidates();
     fetchLogs();
-  }, [fetchLogs]);
-  const [showForm, setShowForm]     = useState(false);
-  const [filter, setFilter]         = useState("all");
-  const [actionLoading, setActionLoading] = useState(null);
-  const [formLoading, setFormLoading]     = useState(false);
-  const [toast, setToast]           = useState(null);
+    const interval = setInterval(() => {
+      fetchCandidates();
+      fetchLogs();
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [fetchCandidates, fetchLogs]);
 
   const showToast = (message, type = "success") => {
     setToast({ message, type });
@@ -441,9 +472,7 @@ export default function HRAgentPage() {
   };
 
   const addLog = (type: string, action: string, detail: string) => {
-    setLogs(prev => [{ id: Date.now(), type, action, detail, time: "Just now" }, ...prev]);
-    // Refresh logs from backend after a short delay to capture server-side logs
-    setTimeout(() => fetchLogs(), 1500);
+    setTimeout(() => fetchLogs(), 500);
   };
 
   // ── Submit Application → POST /hr/apply ──────────────────────────────────
@@ -499,8 +528,9 @@ export default function HRAgentPage() {
       if (score !== null) addLog("screen", `AI Score: ${score}/100`, `${form.name} → ${decision}`);
       addLog("email", `${decision === "selected" ? "Shortlist" : "Rejection"} Email Sent`, form.email);
 
-      showToast(`✅ Application submitted! AI Score: ${score ?? "pending"}/100 — ${decision}`, "success");
+      showToast(`✅ Application submitted!`, "success");
       setShowForm(false);
+      setTimeout(() => fetchCandidates(), 800);
     } catch (err) {
       showToast(`❌ Error: ${err.message}`, "error");
     } finally {
@@ -513,55 +543,45 @@ export default function HRAgentPage() {
     setActionLoading(id);
     try {
       if (action === "screen") {
-        // Re-screen via /hr/apply
         const res = await apiCall("/hr/apply", {
-          name: candidate.name, email: candidate.email,
-          role: candidate.position, resumeText: candidate.notes || candidate.position,
-        });
-        const screening = res.result?.screening;
-        const score     = screening?.score ?? Math.floor(Math.random() * 60) + 30;
-        const decision  = screening?.decision ?? (score >= 50 ? "selected" : "rejected");
-        const newStatus = decision === "selected" ? "shortlisted" : "rejected";
-        setCandidates(prev => prev.map(c => c.id === id ? { ...c, resumeScore: score, status: newStatus, notes: screening?.summary || c.notes } : c));
-        addLog("screen", `AI Score: ${score}/100 → ${decision}`, candidate.name);
-        addLog("email", `${newStatus === "shortlisted" ? "Shortlist" : "Rejection"} email sent`, candidate.email);
-        showToast(`🤖 Score: ${score}/100 — ${decision}`, score >= 50 ? "success" : "error");
-      }
-
-      if (action === "schedule") {
-        await apiCall("/hr/schedule-interview", {
-          name: candidate.name, email: candidate.email, role: candidate.position,
-        });
-        const dateStr = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) + " — 10:00 AM";
-        const meetLink = `https://meet.google.com/${Math.random().toString(36).slice(2,5)}-${Math.random().toString(36).slice(2,6)}-${Math.random().toString(36).slice(2,5)}`;
-        setCandidates(prev => prev.map(c => c.id === id ? { ...c, status: "interview_scheduled", interviewDate: dateStr, meetLink } : c));
-        addLog("schedule", "Interview Scheduled + Google Meet", `${candidate.name} — ${dateStr}`);
-        addLog("email", "Calendar invite + Meet link sent", candidate.email);
-        showToast("📅 Interview scheduled! Calendar invite sent.", "success");
-      }
-
-      if (action === "hire") {
-        await apiCall("/hr/hire", {
-          name: candidate.name, email: candidate.email, role: candidate.position,
-          salary: "$80,000/year", startDate: "March 1, 2026",
+          name: candidate.name,
+          email: candidate.email,
+          role: candidate.position,
           resumeText: candidate.notes || candidate.position,
         });
-        setCandidates(prev => prev.map(c => c.id === id ? { ...c, status: "hired" } : c));
-        addLog("hire",  "Candidate Hired",           `${candidate.name} — ${candidate.position}`);
-        addLog("email", "Offer Letter Sent",          candidate.email);
-        addLog("email", "5-Day Onboarding Plan Sent", candidate.email);
-        showToast("🎉 Hired! Offer letter + onboarding plan sent.", "success");
+        showToast(`🤖 Screening complete!`, "success");
       }
-
+      if (action === "schedule") {
+        await apiCall("/hr/schedule-interview", {
+          name: candidate.name,
+          email: candidate.email,
+          role: candidate.position,
+        });
+        showToast("📅 Interview scheduled!", "success");
+      }
+      if (action === "hire") {
+        await apiCall("/hr/hire", {
+          name: candidate.name,
+          email: candidate.email,
+          role: candidate.position,
+          salary: "$80,000/year",
+          startDate: "March 1, 2026",
+          resumeText: candidate.notes || candidate.position,
+        });
+        showToast("🎉 Candidate hired!", "success");
+      }
       if (action === "reject") {
         await apiCall("/hr/reject", {
-          name: candidate.name, email: candidate.email, role: candidate.position,
+          name: candidate.name,
+          email: candidate.email,
+          role: candidate.position,
         });
-        setCandidates(prev => prev.map(c => c.id === id ? { ...c, status: "rejected" } : c));
-        addLog("reject", "Candidate Rejected",      `${candidate.name} — ${candidate.position}`);
-        addLog("email",  "Rejection Email Sent",    candidate.email);
-        showToast("Rejection email sent to candidate.", "info");
+        showToast("Rejection email sent.", "info");
       }
+      setTimeout(() => {
+        fetchCandidates();
+        fetchLogs();
+      }, 1000);
     } catch (err) {
       showToast(`❌ API Error: ${err.message}`, "error");
     } finally {
@@ -569,8 +589,14 @@ export default function HRAgentPage() {
     }
   };
 
-  const filtered = filter === "all" ? candidates : candidates.filter(c => c.status === filter);
-  const counts   = candidates.reduce((a, c) => ({ ...a, [c.status]: (a[c.status] || 0) + 1 }), {});
+  const filtered = candidates.filter(c => {
+    const statusMatch = filter === "all" || c.status === filter;
+    const searchMatch = searchQuery === "" || c.name.toLowerCase().includes(searchQuery.toLowerCase()) || c.email.toLowerCase().includes(searchQuery.toLowerCase());
+    const roleMatch = roleFilter === "" || c.position.toLowerCase().includes(roleFilter.toLowerCase());
+    return statusMatch && searchMatch && roleMatch;
+  });
+  const uniqueRoles = [...new Set(candidates.map(c => c.position).filter(p => p !== "—"))].sort();
+  const counts = candidates.reduce((a, c) => ({ ...a, [c.status]: (a[c.status] || 0) + 1 }), {});
 
   const logColors = { apply: "#60a5fa", screen: "#fbbf24", schedule: "#a78bfa", hire: "#4ade80", reject: "#f87171", email: "#0099dd" };
   const logIcons  = { apply: Icons.UserPlus, screen: Icons.Brain, schedule: Icons.Calendar, hire: Icons.Trophy, reject: Icons.X, email: Icons.Mail };
@@ -624,6 +650,27 @@ export default function HRAgentPage() {
           <KpiCard title="Rejected"            value={counts.rejected || 0}                sub="Emails sent"         color="#f87171" IconComp={Icons.X} />
         </div>
 
+        {/* Search and Filters */}
+        <div style={{ display: "flex", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder="Search by name or email..."
+            style={{ flex: 1, minWidth: 200, background: "#101824", border: "1px solid #1a2530", borderRadius: 10, padding: "10px 14px", fontSize: 13, color: "#f0f6fc", outline: "none" }}
+          />
+          {uniqueRoles.length > 0 && (
+            <select
+              value={roleFilter}
+              onChange={e => setRoleFilter(e.target.value)}
+              style={{ background: "#101824", border: "1px solid #1a2530", borderRadius: 10, padding: "10px 14px", fontSize: 13, color: "#f0f6fc", outline: "none", cursor: "pointer", minWidth: 180 }}
+            >
+              <option value="">All Roles</option>
+              {uniqueRoles.map(role => <option key={role} value={role}>{role}</option>)}
+            </select>
+          )}
+        </div>
+
         {/* Filter Tabs */}
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 20 }}>
           {[{ key: "all", label: "All", count: candidates.length }, ...Object.entries(statusConfig).map(([k, v]) => ({ key: k, label: v.label, count: counts[k] || 0 }))].map(tab => (
@@ -643,10 +690,20 @@ export default function HRAgentPage() {
 
           {/* Candidate Cards */}
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            {filtered.length === 0 ? (
+            {candidatesLoading ? (
+              <div style={{ background: "#101824", border: "1px solid #1a2530", borderRadius: 16, padding: "48px 24px", textAlign: "center" }}>
+                <Icons.Loader size={40} style={{ color: "#0099dd", display: "block", margin: "0 auto 12px", animation: "spin 1s linear infinite" }} />
+                <p style={{ fontSize: 13, color: "#6b7f8e" }}>Loading candidates...</p>
+              </div>
+            ) : filtered.length === 0 ? (
               <div style={{ background: "#101824", border: "1px solid #1a2530", borderRadius: 16, padding: "48px 24px", textAlign: "center" }}>
                 <Icons.UserPlus size={40} style={{ color: "#3d4f5c", display: "block", margin: "0 auto 12px" }} />
-                <p style={{ fontSize: 13, color: "#6b7f8e" }}>No candidates with this status</p>
+                <p style={{ fontSize: 13, color: "#6b7f8e" }}>
+                  {searchQuery || roleFilter ? `No candidates matching your filters` : `No candidates yet`}
+                </p>
+                {(searchQuery || roleFilter) && (
+                  <p style={{ fontSize: 12, color: "#3d4f5c", marginTop: 8 }}>Try adjusting your search or filters</p>
+                )}
               </div>
             ) : filtered.map(c => (
               <CandidateCard key={c.id} candidate={c} onAction={handleAction} actionLoading={actionLoading} />
@@ -658,7 +715,8 @@ export default function HRAgentPage() {
             <h3 style={{ fontSize: 13, fontWeight: 700, color: "#f0f6fc", marginBottom: 16, display: "flex", alignItems: "center", gap: 6 }}>
               <Icons.Clock size={14} style={{ color: "#0099dd" }} /> Live Activity Log
             </h3>
-            <div style={{ display: "flex", flexDirection: "column", gap: 12, maxHeight: 520, overflowY: "auto", paddingRight: 4 }}>
+            <p style={{ fontSize: 10, color: "#3d4f5c", marginBottom: 12, fontStyle: "italic" }}>Auto-refreshes every 10 seconds</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, maxHeight: 480, overflowY: "auto", paddingRight: 4 }}>
               {logsLoading ? (
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "32px 0", gap: 8 }}>
                   <Icons.Loader size={16} className="spin" style={{ color: "#0099dd" }} />
