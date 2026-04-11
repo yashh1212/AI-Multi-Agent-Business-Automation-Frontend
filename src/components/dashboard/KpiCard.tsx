@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { motion } from "framer-motion";
 import { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 
 interface KpiCardProps {
   title: string;
@@ -15,6 +16,10 @@ interface KpiCardProps {
 }
 
 export function KpiCard({ title, value, change, changeType = "positive", icon: Icon, delay = 0, className }: KpiCardProps) {
+  const navigate = useNavigate();
+  if(sessionStorage.getItem("login") !== "true") {
+    navigate("/login"); // or you can return a placeholder or redirect to login
+  }
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

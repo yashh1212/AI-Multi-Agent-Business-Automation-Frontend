@@ -28,7 +28,7 @@ const navItems = [
   { path: "/mail", label: "Mail Automation", icon: Mail },
   // { path: "/analytics", label: "Analytics", icon: BarChart3 },
   // { path: "/logs", label: "Activity Logs", icon: ScrollText },
-  { path: "/settings", label: "Settings", icon: Settings },
+  // { path: "/settings", label: "Settings", icon: Settings },
 ];
 
 export function AppSidebar() {
@@ -54,7 +54,7 @@ export function AppSidebar() {
               exit={{ opacity: 0, width: 0 }}
               className="text-lg font-bold tracking-tight text-foreground overflow-hidden whitespace-nowrap"
             >
-              NexusAI
+              Business Auto
             </motion.span>
           )}
         </AnimatePresence>

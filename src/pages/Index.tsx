@@ -36,7 +36,7 @@ const Dashboard = () => {
             {dataUpdatedAt > 0 && (
               <span className="text-xs text-muted-foreground flex items-center gap-1.5">
                 {isLoading && <Loader2 className="h-3 w-3 animate-spin" />}
-                Live · refreshes every 30s
+                Live · refreshes every 1Min
               </span>
             )}
           </div>

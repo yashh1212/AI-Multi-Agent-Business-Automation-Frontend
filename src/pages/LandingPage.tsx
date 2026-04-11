@@ -84,6 +84,9 @@ const LandingPage = () => {
     logout();
     navigate("/login");
   };
+  if(sessionStorage.getItem("login") !== "true") {
+    navigate("/login"); // or you can return a placeholder or redirect to login
+  }
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
@@ -122,14 +125,14 @@ const LandingPage = () => {
             <Zap className="h-6 w-6 text-primary-foreground" />
           </div>
           <span className="text-xl font-bold tracking-tight text-foreground">
-            NexusAI
+            Business Auto
           </span>
         </div>
         <div className="flex items-center gap-4">
           {dataUpdatedAt > 0 && (
             <span className="text-xs text-muted-foreground flex items-center gap-1.5">
               {isLoading && <Loader2 className="h-3 w-3 animate-spin" />}
-              Live · refreshes every 30s
+              Live · refreshes every 1Min
             </span>
           )}
           <button

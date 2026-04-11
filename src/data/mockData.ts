@@ -42,7 +42,7 @@ export const emailLogs = [
   { id: 1, recipient: "john@acme.com", subject: "Weekly Report - Week 8", status: "delivered" as const, timestamp: "2024-02-21 14:30" },
   { id: 2, recipient: "sarah@client.io", subject: "Follow-up: Enterprise Deal", status: "opened" as const, timestamp: "2024-02-21 14:15" },
   { id: 3, recipient: "dev-team@company.com", subject: "Bug Alert - Auth Service", status: "delivered" as const, timestamp: "2024-02-21 13:45" },
-  { id: 4, recipient: "mike@partner.co", subject: "Welcome to NexusAI!", status: "failed" as const, timestamp: "2024-02-21 13:30" },
+  { id: 4, recipient: "mike@partner.co", subject: "Welcome to Business Auto!", status: "failed" as const, timestamp: "2024-02-21 13:30" },
   { id: 5, recipient: "alerts@ops.team", subject: "Decision Required - Budget Q2", status: "delivered" as const, timestamp: "2024-02-21 13:00" },
   { id: 6, recipient: "lisa@marketing.io", subject: "CRM Lead Score Update", status: "opened" as const, timestamp: "2024-02-21 12:30" },
 ];
@@ -61,8 +61,8 @@ export const activityLogs = [
 ];
 
 export const workspaces = [
-  { id: 1, name: "NexusAI Production", members: 12, agents: 8, integrations: 6 },
-  { id: 2, name: "NexusAI Staging", members: 8, agents: 8, integrations: 4 },
+  { id: 1, name: "Business Auto Production", members: 12, agents: 8, integrations: 6 },
+  { id: 2, name: "Business Auto Staging", members: 8, agents: 8, integrations: 4 },
   { id: 3, name: "Client Portal", members: 5, agents: 4, integrations: 3 },
 ];
 

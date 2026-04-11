@@ -21,7 +21,7 @@ const SettingsPage = () => (
           </div>
           <div>
             <label className="text-xs font-medium text-muted-foreground">Workspace ID</label>
-            <input defaultValue="ws_nexusai_prod_001" readOnly className="mt-1 w-full rounded-lg border border-border bg-muted/30 px-3 py-2 text-sm text-muted-foreground" />
+            <input defaultValue="ws_Business Auto_prod_001" readOnly className="mt-1 w-full rounded-lg border border-border bg-muted/30 px-3 py-2 text-sm text-muted-foreground" />
           </div>
         </div>
       </motion.div>

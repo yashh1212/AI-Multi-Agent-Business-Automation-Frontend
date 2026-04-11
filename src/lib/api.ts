@@ -110,7 +110,7 @@ export interface DashboardData {
 
 // ─── React Query Hooks — 30 second auto-refresh ─────────────────────────────────
 
-const REFETCH_INTERVAL = 30_000; // 30 seconds
+const REFETCH_INTERVAL = 60_000; // 1 minute
 
 export function useDashboard() {
   return useQuery<DashboardData>({

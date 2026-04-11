@@ -29,7 +29,7 @@ const LoginPage = () => {
     if (success) {
       navigate("/landing");
     } else {
-      setError("Invalid email or password. Try admin@nexusai.com / admin123");
+      setError("Invalid email or password. Try again");
     }
   };
 
@@ -103,7 +103,7 @@ const LoginPage = () => {
                 <Zap className="h-7 w-7 text-primary-foreground" />
               </div>
               <span className="text-2xl font-bold tracking-tight text-foreground">
-                NexusAI
+                Business Auto
               </span>
             </div>
             <h1 className="text-xl font-semibold text-foreground mb-1">
@@ -134,7 +134,7 @@ const LoginPage = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@nexusai.com"
+                  placeholder="admin@Business Auto.com"
                   className="w-full rounded-xl border border-border bg-muted/50 py-3 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all"
                   disabled={isLoading}
                 />
@@ -225,16 +225,16 @@ const LoginPage = () => {
             transition={{ delay: 0.5 }}
             className="mt-6 pt-6 border-t border-border/50"
           >
-            <p className="text-center text-xs text-muted-foreground">
+            {/* <p className="text-center text-xs text-muted-foreground">
               Demo credentials:{" "}
               <code className="px-1.5 py-0.5 rounded bg-muted text-foreground text-xs font-mono">
-                admin@nexusai.com
+                admin@Business Auto.com
               </code>{" "}
               /{" "}
               <code className="px-1.5 py-0.5 rounded bg-muted text-foreground text-xs font-mono">
                 admin123
               </code>
-            </p>
+            </p> */}
           </motion.div>
         </div>
 
@@ -245,7 +245,7 @@ const LoginPage = () => {
           transition={{ delay: 0.7 }}
           className="text-center text-xs text-muted-foreground/60 mt-6"
         >
-          Powered by NexusAI — AI Multi-Agent Business Automation
+          Powered by Business Auto— AI Multi-Agent Business Automation
         </motion.p>
       </motion.div>
     </div>

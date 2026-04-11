@@ -553,7 +553,7 @@ export default function HRAgentPage() {
     const interval = setInterval(() => {
       fetchCandidates();
       fetchLogs();
-    }, 10000);
+    }, 100000);
 
     return () => clearInterval(interval);
   }, [fetchCandidates, fetchLogs]);
@@ -734,7 +734,7 @@ export default function HRAgentPage() {
           <div className="flex items-center gap-3">
             <span className="inline-flex items-center gap-2 rounded-full bg-muted px-3 py-2 text-xs text-muted-foreground">
               <span className="status-dot status-running" />
-              Live refresh every 10s
+              Live refresh every 10 Min
             </span>
             <Button onClick={() => setShowForm(true)} className="rounded-full">
               <UserPlus className="h-4 w-4" />
@@ -872,7 +872,7 @@ export default function HRAgentPage() {
               </div>
             </motion.div>
 
-            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="glass-card rounded-3xl p-5">
+            {/* <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="glass-card rounded-3xl p-5">
               <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
                 <FileText className="h-4 w-4 text-primary" />
                 API Endpoints
@@ -892,7 +892,7 @@ export default function HRAgentPage() {
                   </div>
                 ))}
               </div>
-            </motion.div>
+            </motion.div> */}
           </div>
         </div>
       </div>
